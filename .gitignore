@@ -1,0 +1,16 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj
+*.xlsx
+Figures/
+*.docx
+FiguresAI/
+*.pptx
+Thumbs.db
+MTub_SmegOrthologs_20180206/
+RAW/NoGit/
+
+
+

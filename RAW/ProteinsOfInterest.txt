@@ -1,0 +1,33 @@
+Entry name	H37Rv	 mc²155	Protein function	category	keep
+FAS	Rv2524c	MSMEG_4757	Fatty acid synthase	Fatty acid synthesis, elongation and modification	T
+MtFabH	Rv0533c	?no ortholog..	Yes/yes	Fatty acid synthesis, elongation and modification	T
+FabD	Rv2243	MSMEG_4325	Malonyl CoA-acyl carrier protein transacylase	Fatty acid synthesis, elongation and modification	T
+AcpM	Rv2244	MSMEG_4326	Acyl carrier protein	Fatty acid synthesis, elongation and modification	T
+KasA	Rv2245	MSMEG_4327	beta-ketoacyl-ACP synthase I	Fatty acid synthesis, elongation and modification	T
+KasB	Rv2246	MSMEG_4328	beta-ketoacyl-ACP synthase 2	Fatty acid synthesis, elongation and modification	T
+AccD6	Rv2247	MSMEG_4329	Acetyl-CoA carboxylase (beta subunit)	Fatty acid synthesis, elongation and modification	T
+MabA	Rv1483	MSMEG_3150	3-ketoacyl-acyl carrier protein reductase	Fatty acid synthesis, elongation and modification	T
+InhA	Rv1484	MSMEG_3151	NADH-dependent enoyl-ACP reductase	Fatty acid synthesis, elongation and modification	T
+HadA	Rv0635	MSMEG_1340	(3R)-hydroxyacyl-ACP dehydratase subunit	Fatty acid synthesis, elongation and modification	T
+HadB	Rv0636	MSMEG_1341	(3R)-hydroxyacyl-ACP dehydratase subunit	Fatty acid synthesis, elongation and modification	T
+HadC	Rv0637	MSMEG_1342	(3R)-hydroxyacyl-ACP dehydratase subunit	Fatty acid synthesis, elongation and modification	T
+DesA2	Rv1094	MSMEG_5248	Acyl/stearoyl-ACP desaturase	Fatty acid synthesis, elongation and modification	T
+PcaA	Rv0470c	?	cyclopropane synthase	Fatty acid synthesis, elongation and modification	T
+MmaA2	Rv0644c	?	methyl mycolic acid synthase 2	Fatty acid synthesis, elongation and modification	F
+FadD32	Rv3801c	MSMEG_6393	Fatty acyl-AMP/ACP ligase	Mycolic acid condensation, transport and transfer	T
+Pks13	Rv3800c	MSMEG_6392	Polyketide synthase	Mycolic acid condensation, transport and transfer	T
+AccD4	Rv3799c	MSMEG_6391	Acetyl/propionyl-CoA carboxylase beta chain 4	Mycolic acid condensation, transport and transfer	T
+AccD5	Rv3280	MSMEG_1813	propionyl-CoA carboxylase beta chain 5	Mycolic acid condensation, transport and transfer	T
+AccA3	Rv3285	MSMEG_1807	biotin carboxyl carrier protein and biotin carboxyltransferase	Mycolic acid condensation, transport and transfer	T
+MmpL3	Rv0206c	MSMEG_0250	transmembrane transport protein	Mycolic acid condensation, transport and transfer	T
+Ag85A	Rv3804c	MSMEG_2078, MSMEG_6398	Secreted antigen 85-A FbpA (fibronectin-binding protein A) (antigen 85 complex A)	Mycolic acid condensation, transport and transfer	T
+Ag85B	Rv1886c	MSMEG_2078, MSMEG_6398	Secreted antigen 85-B FbpB (85B) (antigen 85 complex B) (mycolyl transferase 85B) (fibronectin-binding protein B) (extracellular alpha-antigen)	Mycolic acid condensation, transport and transfer	T
+Ag85C	Rv0129c	MSMEG_3580	Secreted antigen 85-C FbpC (85C) (antigen 85 complex C) (AG58C) (mycolyl transferase 85C) (fibronectin-binding protein C)	Mycolic acid condensation, transport and transfer	T
+Ag85D	Rv3803c	MSMEG_6396	Secreted MPT51/MPB51 antigen protein FbpD (MPT51/MPB51 antigen 85 complex C) (AG58C) (mycolyl transferase 85C) (fibronectin-binding protein C) (85C)	Mycolic acid condensation, transport and transfer	T
+PknBtubm	Rv0014c		Transmembrane serine/threonine-protein kinase B PknB (protein kinase B) (STPK B)	Known markers phosphorylated (substrates of PknB)	T
+PknB		MSMEG_0028		Known markers phosphorylated (substrates of PknB)	T
+GarA	Rv1827	MSMEG_3647	Conserved protein with FHA domain, GarA	Known markers phosphorylated (substrates of PknB)	T
+PstP	Rv0018c	MSMEG_0033	Phosphoserine/threonine phosphatase PstP	Known markers phosphorylated (substrates of PknB)	T
+Wag31	Rv2145c	MSMEG_4217	Diviva family protein Wag31	Known markers phosphorylated (substrates of PknB)	T
+RseA	Rv1222	MSMEG_5071	Anti-sigma factor RseA	Known markers phosphorylated (substrates of PknB)	F
+Ppp		MSMEG_0033	Serine/threonine phosphatase PPP	Known markers phosphorylated (substrates of PknB)	T
