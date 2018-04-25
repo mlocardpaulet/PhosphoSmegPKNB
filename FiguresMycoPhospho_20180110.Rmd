@@ -1,0 +1,240 @@
+---
+title: "Figures projet Myco Phospho"
+author: "Marie Locard-Paulet"
+date: '`r date()`'
+output: html_document
+---
+
+```{r packages, echo = F, message=FALSE}
+require(ggplot2)
+require(reshape2)
+require(knitr)
+require(gplots)
+
+
+knitr::opts_chunk$set(echo = F)
+source("RScripts/Functions/pdfMLP.R")
+```
+
+Data from the analysis described in the document `DataInspection_20171205`.
+
+```{r input}
+load("RData/Stat.RData")
+tab$PhosID <- gsub("MSMEG_4757", "Fas1", as.character(tab$PhosID))
+```
+
+# Heatmap of most regulated proteins
+
+I keep the sites that are significantly regulated in K Vs P and L Vs P.
+
+```{r}
+# Select values:
+int <- tab[tab$Significant_KVsP & tab$Significant_LVsP,grepl("MeanTech", names(tab))]
+int$Phosphosite <- tab$PhosID[tab$Significant_KVsP & tab$Significant_LVsP]
+names(int)[1:(ncol(int)-1)] <- substr(names(int), 11, 12)[1:(ncol(int)-1)]
+int$RegulationDirection <- ifelse(tab$Intensity.K_Vs_Intensity.P_FC[tab$Significant_KVsP & tab$Significant_LVsP]>0, "Negative", "Positive")
+
+# Order sites:
+int$Phosphosite <- factor(as.character(int$Phosphosite), levels = int$Phosphosite[order(tab$Intensity.K_Vs_Intensity.P_FC[tab$Significant_KVsP & tab$Significant_LVsP])])
+int <- int[order(tab$Intensity.K_Vs_Intensity.P_FC[tab$Significant_KVsP & tab$Significant_LVsP]),]
+
+# Select the top regulated sites:
+perc <- 0.1 # Percentage of plotted sites
+pos <- floor(length(int$RegulationDirection[int$RegulationDirection=="Positive"])*perc)
+neg <- ceiling(length(int$RegulationDirection[int$RegulationDirection=="Negative"])*1)
+intpos <- int[1:pos,1:10]
+intneg <- int[(nrow(int)-neg+1):nrow(int),1:10]
+
+# Create table for plotting:
+gtabpos <- melt(intpos)
+gtabneg <- melt(intneg)
+
+
+
+colours = c("darkred","red", "gold")
+
+gtabpos$Phosphosite <- factor(as.character(gtabpos$Phosphosite), levels = rev(levels(gtabpos$Phosphosite)))
+g1 <- ggplot(gtabpos, aes(y = Phosphosite, x = variable)) + theme_minimal() + geom_tile(aes(fill = value)) + scale_fill_gradientn(colours = colours) + theme(axis.title.x = element_blank()) + theme(axis.ticks.x = element_blank(), axis.text.x = element_text(size = 10), axis.text.y = element_text(size = 6)) + geom_vline(xintercept = c(3.5,6.5), size = 1) + ggtitle("Mean log2(LFQ intensities)")
+print(g1)
+
+g2 <- ggplot(gtabneg, aes(y = Phosphosite, x = variable)) + theme_minimal() + geom_tile(aes(fill = value)) + scale_fill_gradientn(colours = colours) + theme(axis.title.x = element_blank()) + theme(axis.ticks.x = element_blank(), axis.text.x = element_text(size = 10), axis.text.y = element_text(size = 6)) + geom_vline(xintercept = c(3.5,6.5), size = 1) + ggtitle("Mean log2(LFQ intensities)")
+print(g2)
+
+pdfMLP(list(g1, g2), "Figures/HeatmapRegSites.pdf", "portrait")
+```
+
+# Proportion of phosphorylated amino-acids
+
+```{r}
+table(tab$Amino.acid)
+table(tab$Amino.acid[tab$Significant_KVsL])
+table(tab$Amino.acid[tab$Significant_KVsP])
+table(tab$Amino.acid[tab$Significant_LVsP])
+
+gtab <- data.frame("amino-acid" = c(c("S", "T", "Y"), "T", rep(c("S", "T", "Y"), 2)), "Count" = c(table(tab$Amino.acid), table(tab$Amino.acid[tab$Significant_KVsL]), table(tab$Amino.acid[tab$Significant_KVsP]), table(tab$Amino.acid[tab$Significant_LVsP])), "Conditions" = c(rep(c("Total regulated"), 3), "Regulated in KVsL", rep(c("Regulated in KVsP", "Regulated in LVsP"), each = 3)))
+
+gtab$amino.acid <- factor(as.character(gtab$amino.acid), levels = c("Y", "S", "T"))
+
+g <- ggplot(gtab, aes(x = Conditions, y = Count, fill = amino.acid)) + geom_bar(stat = "identity") + scale_fill_manual(values = c("darkred", "chocolate1", "cornflowerblue")) + theme_light() + labs("title" = "Proportion of phosphorylated-serines and threonines") + xlab("") + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+print(g)
+pdfMLPManual(g, "Figures/AminoAcids.pdf", 5.5, 5)
+```
+
+# Global representation of the impact of PknB over-expression on the phosphoproteome
+
+```{r}
+MeanK <- rowMeans(tab[,289:291], na.rm = T)
+MeanL <- rowMeans(tab[,292:294], na.rm = T)
+MeanP <- rowMeans(tab[,295:297], na.rm = T)
+
+gtab <- data.frame(MeanK, MeanL, MeanP)
+g1 <- ggplot(gtab, aes(x = MeanK, y = MeanP)) + geom_abline(slope = 1, intercept = 0) + geom_point(alpha = 0.6) + ylab("Mean of log2(MS values) in PknB") + xlab("Mean of log2(MS values) in PknB-K40M") + theme_light()
+g2 <- ggplot(gtab, aes(x = MeanL, y = MeanP)) + geom_abline(slope = 1, intercept = 0) + geom_point(alpha = 0.6) + xlab("Mean of log2(MS values) in the control") + ylab("Mean of log2(MS values) in PknB") + theme_light()
+g3 <- ggplot(gtab, aes(x = MeanK, y = MeanL)) + geom_abline(slope = 1, intercept = 0) + geom_point(alpha = 0.6) + xlab("Mean of log2(MS values) in PknB-K40M") + ylab("Mean of log2(MS values) in the control") + theme_light()
+
+plot(g1); plot(g2); plot(g3)
+pdfMLPManual(list(g1, g2, g3), "Figures/CorrelationsPhospho.pdf", 8,7)
+
+gtab <- data.frame("MeanK" = table(is.na(MeanK)), "MeanP" = table(is.na(MeanP)), "MeanL" = table(is.na(MeanL)))
+gtab <- melt(gtab)
+gtab$Detected <- ifelse(gtab$MeanL.Var1 == "TRUE", "No", "yes")
+gtab$variable <- gsub(".Freq", "", as.character(gtab$variable), fixed = T)
+g <- ggplot(gtab[gtab$Detected=="yes",], aes(y= value, x = variable)) + geom_bar(stat = "identity", position = "dodge", alpha = 0.8, col = "black") + theme_light() + ylab("Count") + xlab("") + ggtitle("Number of phosphorylation site")
+print(g)
+
+pdfMLPManual(g, "Figures/NumberIDPhospho.pdf", 7,6)
+```
+
+
+# Heatmap with the proteins of interest:
+
+```{r}
+IntProt <- read.table("OutputTables/ProteinsOfInterest2.txt", sep = "\t", header = T, stringsAsFactors = F)
+IntProt <- IntProt[IntProt$keep,]
+tab$GeneID2 <- gsub(" ", "", tab$GeneID2)
+tab$PhosID <- gsub(" ", "", tab$PhosID)
+
+keep <- ((toupper(tab$GeneID2) %in% toupper(c(as.character(IntProt$Entry.name), "pknb", "pknbtub", "mtpknb"))) | tab$GeneID2 == "MSMEG_4757")
+
+# Distinction between the tub Vs smeg PknB:
+tab$GeneID2[tab$ProtMatchingName=="A0QNG1" & !is.na(tab$ProtMatchingName)] <- paste0("Smeg_", tab$GeneID2[tab$ProtMatchingName=="A0QNG1" & !is.na(tab$ProtMatchingName)])
+tab$PhosID[tab$ProtMatchingName=="A0QNG1" & !is.na(tab$ProtMatchingName)] <- paste0("Smeg_", tab$PhosID[tab$ProtMatchingName=="A0QNG1" & !is.na(tab$ProtMatchingName)])
+
+# Select values:
+int <- tab[keep,grepl("MeanTech", names(tab))]
+int$Phosphosite <- tab$PhosID[keep]
+
+names(int)[1:(ncol(int)-1)] <- substr(names(int), 11, 12)[1:(ncol(int)-1)]
+
+int$RegulationDirection <- ifelse(tab$Intensity.K_Vs_Intensity.P_FC[keep]>0, "Negative", "Positive")
+int <- int[!is.na(int$Phosphosite),]
+
+# Order sites:
+int$Phosphosite <- factor(as.character(int$Phosphosite), levels = int$Phosphosite[order(tab$Intensity.K_Vs_Intensity.P_FC[keep])])
+int <- int[order(tab$Intensity.K_Vs_Intensity.P_FC[keep]),]
+
+#intpos <- int[int$RegulationDirection=="Positive",]
+intpos <- int
+intneg <- int[int$RegulationDirection=="Negative",]
+
+intpos <- intpos[!is.na(intpos$Phosphosite),]
+intneg <- intneg[!is.na(intneg$Phosphosite),]
+
+
+# Create table for plotting:
+gtabpos <- melt(intpos)
+gtabneg <- melt(intneg)
+
+# For marginal plots:
+library(scales)
+require(gtable)
+
+## To format heatmap y.ticks with appropriate width (5 chars),
+## to align with gg_rows y.tics
+ytickform <- function(x){
+    lab <- sprintf("%05s",x)
+}
+
+colours = c("darkred","red", "gold")
+
+#gtabpos <- gtabpos[!is.na(gtabpos$value),]
+gtabpos$Phosphosite <- factor(as.character(gtabpos$Phosphosite), levels = rev(levels(gtabpos$Phosphosite)))
+gtabpos$variable <- factor(as.character(gtabpos$variable), levels = c("L1", "L2", "L3", "K1", "K2", "K3", "P1", "P2", "P3"))
+
+# Table with FCs:
+dfFC <- data.frame("FC" = -tab$Intensity.K_Vs_Intensity.P_FC, "Phosphosite" = tab$PhosID, "Significative" = tab$Significant_KVsP)
+#dfFC <- dfFC[order(dfFC$FC, decreasing = T),]
+#dfFC <- dfFC[!duplicated(dfFC$Phosphosite),]
+dfFC <- dfFC[dfFC$Phosphosite %in% as.character(gtabpos$Phosphosite),]
+dfFC <- dfFC[!is.na(dfFC$Phosphosite),]
+dfFC <- dfFC[match(as.character(gtabpos$Phosphosite), dfFC$Phosphosite),]
+dfFC <- dfFC[!duplicated(dfFC),]
+dfFC$Phosphosite <- factor(as.character(dfFC$Phosphosite), levels = as.character(dfFC$Phosphosite[order(dfFC$FC, decreasing = F)]))
+dfFC$Gene <- sapply(as.character(dfFC$Phosphosite), function(x) {
+  strsplit(x, "-", fixed = T)[[1]][1]
+})
+dfFC$Gene <- gsub("Smeg_", "", dfFC$Gene) 
+dfFC$Category <- as.character(IntProt$category[match(toupper(dfFC$Gene), toupper(IntProt$Entry.name))])
+dfFC$Category[dfFC$Gene=="Fas1"] <- IntProt$category[IntProt$Entry.name=="FAS"]
+dfFC$Category[is.na(dfFC$Category)] <- "PknB"
+dfFC$Category[dfFC$Category=="1"] <- "Fatty acid synthesis, elongation and modification"
+
+dfFC <- dfFC[!is.na(dfFC$FC),]
+
+# I loop over the categories:
+
+cat <- as.character(unique(dfFC$Category))
+require(grid)
+
+# Homogenizing colour scale:
+val1 <- min(gtabpos$value, na.rm = T)
+val4 <- max(gtabpos$value, na.rm = T)
+val <-  (max(gtabpos$value, na.rm = T) - min(gtabpos$value, na.rm = T))/3
+val2 <- val1+val
+val3 <- val2+val
+mid <- (max(gtabpos$value, na.rm = T) - min(gtabpos$value, na.rm = T))/2+val1
+
+for (el in cat) {
+  gtab <- gtabpos[gtabpos$Phosphosite %in% dfFC$Phosphosite[dfFC$Category==el],]
+
+  
+  #gtab <- gtab[!duplicated(gtab$Phosphosite),]
+
+  g1 <- ggplot(gtab, aes(y = Phosphosite, x = variable)) + theme_minimal() + geom_tile(aes(fill = value)) + scale_fill_gradientn(colours = colours, limits = c(val1, val4)) + theme(axis.title.x = element_blank()) + theme(axis.ticks.x = element_blank(), axis.text.x = element_text(size = 10), axis.text.y = element_text(size = 6)) + geom_vline(xintercept = c(3.5,6.5), size = 1) + ggtitle(el)
+  print(g1)
+  
+  gg_hm <- g1 + scale_y_discrete(label=ytickform) + theme(legend.position = "bottom", plot.margin = unit(c(3,3,3,3), "mm")) + theme(plot.margin = unit(c(3,3,3,3), "mm"))
+  
+  gg_rows <- ggplot(dfFC[dfFC$Phosphosite %in% dfFC$Phosphosite[dfFC$Category==el],], aes(y = FC, x = Phosphosite, fill = Significative)) + geom_bar(stat = "identity", col = "grey30") + scale_fill_manual(values = c("grey30", "steelblue1")) + coord_flip() + theme_minimal() + xlab("") + theme(axis.title.y=element_blank(), axis.text.y=element_blank(),axis.ticks.y=element_blank(), axis.title.x=element_blank(), plot.margin = unit(c(9,1,3,1), "mm"))
+  
+  ## extract legend from heatmap
+  g <- ggplotGrob(gg_hm)$grobs
+  legend <- g[[which(sapply(g, function(x) x$name) == "guide-box")]]
+  
+  ## plot heatmap without legend
+  g <- ggplotGrob(gg_hm + theme(legend.position="none"))
+  
+  ## add column and put column barplot within
+  g <- gtable_add_cols(g, unit(5,"cm"))
+  g <- gtable_add_grob(g, ggplotGrob(gg_rows), t = 1, l=ncol(g), b=nrow(g), r=ncol(g))
+  
+  ## add row and put legend within
+  g <- gtable_add_rows(g, unit(1.1,"cm"))
+  g <- gtable_add_grob(g, legend, t = nrow(g), l=1, b=nrow(g), r=ncol(g)-1)
+  
+  name <- gsub(",", "", el)
+  name <- paste0("Figures/HeatmapRegSitesOfInterest_", name, ".pdf")
+  pdf(name, useDingbats=FALSE, 8.27, 11.69)
+  grid.newpage()
+  grid.draw(g)
+  dev.off()
+}
+
+```
+
+********************************************************************************
+
+```{r}
+Sys.info()
+```
