@@ -110,6 +110,39 @@ pdfMLPManual(g, "Figures/NumberIDPhospho.pdf", 7,6)
 # Heatmap with the proteins of interest:
 
 ```{r}
+keep <- ((toupper(tab$GeneID2) %in% toupper(c(as.character(IntProt$Entry.name), "pknb", "pknbtub", "mtpknb"))) | tab$GeneID2 == "MSMEG_4757")
+
+# Select values:
+int <- tab[keep,grepl("Intensity.K_Vs_Intensity.P_FC", names(tab))]
+int <- data.frame("FC_KVsP"= int, "Phosphosite" = tab$PhosID[keep], stringsAsFactors = )
+
+int <- int[!is.na(int$Phosphosite),]
+
+# Order sites:
+int$Phosphosite <- factor(as.character(int$Phosphosite), levels = sort(int$Phosphosite))
+int <- int[order(int$Phosphosite),]
+
+colours = c("darkred","red", "gold")
+int$x <- rep(1, nrow(int))
+
+
+g1 <- ggplot(int, aes(y = Phosphosite, x = x)) + 
+  theme_minimal() + 
+  geom_tile(aes(fill = -FC_KVsP)) + 
+  scale_fill_gradientn(colours = colours) + 
+  theme(axis.title.x = element_blank()) + 
+  theme(axis.ticks.x = element_blank(), axis.text.x = element_text(size = 10), axis.text.y = element_text(size = 6)) + 
+  labs(title = "Log2-transformed Fold changes\nof sites of interest", subtitle = "P Vs K")
+print(g1)
+  
+
+
+```
+
+
+# Heatmap with Fold changes for the pathway figure in the paper:
+
+```{r}
 IntProt <- read.table("OutputTables/ProteinsOfInterest2.txt", sep = "\t", header = T, stringsAsFactors = F)
 IntProt <- IntProt[IntProt$keep,]
 tab$GeneID2 <- gsub(" ", "", tab$GeneID2)
@@ -230,7 +263,6 @@ for (el in cat) {
   grid.draw(g)
   dev.off()
 }
-
 ```
 
 ********************************************************************************
