@@ -251,11 +251,11 @@ colcorr <- colorRampPalette(c("white", "blue", "darkblue", "black"), bias = 0.08
 corrplot(M, method = "color", order = "hclust", tl.cex = 0.6, tl.col = "black", mar = c(1,1,1,1), col = colcorr(600), cl.lim = c(0,1))
 names(intnorm) <- paste0(names(intnorm), "_Log2NormInt")
 
-tab <- cbind(tab, log2(intnorm))
-# write.table(tab, "OutputTables/NormIntProt_20180109.txt", row.names = F, sep = "\t")
+tab <- cbind(tab, intnorm)
+write.table(tab, "OutputTables/NormIntProt_20190127.txt", row.names = F, sep = "\t")
 ```
 
-I save the protein table as `OutputTables/NormIntProt_20180109.txt`. 
+I save the protein table as `OutputTables/NormIntProt_20190127.txt`. 
 
 ## Statistical analysis
 
@@ -500,7 +500,7 @@ pdfMLP(plot = g1, "Figures/ProteomicsFC.pdf", "landscape")
 
 
 ```{r}
-write.table(tab, "OutputTables/NormIntProt_20180110.txt", row.names = F, sep = "\t")
+write.table(tab, "OutputTables/NormIntProt_20190127.txt", row.names = F, sep = "\t")
 ```
 
 
@@ -514,6 +514,8 @@ medprot <- sapply(1:nrow(intnorm), function(x) {
   median(as.numeric(intnorm[x,]), na.rm = T)
 })
 rownames(intnorm) <- tab$Protein.IDs
+# I remove the values for the proteins only identified/quantified by phosphorylated peptides:
+intnorm[tab$Only.identified.by.site == "+",] <- NA
 
 hist(medprot, col = "darkblue", main = "Median intensity per protein")
 val <- medprot[rownames(intnorm)=="A0QNG1"]
@@ -658,7 +660,7 @@ corrplot(M, method = "shade", order = "hclust", tl.cex = 0.6, tl.col = "black", 
 names(intnorm) <- paste0(names(intnorm), "_Log2NormInt")
 tab <- cbind(tab, log2(intnorm))
 
-write.table(tab, "OutputTables/NormIntPhospho_20180117.txt", row.names = F, sep = "\t")
+write.table(tab, "OutputTables/NormIntPhospho_20190127.txt", row.names = F, sep = "\t")
 ```
 
 ## Normalisation to the protein changes
@@ -825,7 +827,7 @@ I add the information in the output table.
 colnames(intmean) <- gsub("NormToProt", "MeanTech", colnames(intmean))
 tab <- cbind(tab, intmean)
 
-write.table(tab, "OutputTables/NormIntPhospho_20170110.txt", row.names = F, sep = "\t")
+write.table(tab, "OutputTables/NormIntPhospho_20190127.txt", row.names = F, sep = "\t")
 ```
 
 ## Replacement of missing values
@@ -1047,7 +1049,7 @@ pdfMLP(list(g, g1, g2), "Figures/VolcanoPhospho.pdf", "landscape")
 ```
 
 ```{r}
-write.table(tab, "OutputTables/StatTable_20180117.txt", sep = "\t", row.names = F)
+write.table(tab, "OutputTables/StatTable_20190127.txt", sep = "\t", row.names = F)
 save(tab, file = "RData/Stat.RData")
 ```
 

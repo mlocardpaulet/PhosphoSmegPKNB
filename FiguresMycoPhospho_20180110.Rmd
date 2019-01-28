@@ -35,7 +35,9 @@ names(int)[1:(ncol(int)-1)] <- substr(names(int), 11, 12)[1:(ncol(int)-1)]
 int$RegulationDirection <- ifelse(tab$Intensity.K_Vs_Intensity.P_FC[tab$Significant_KVsP & tab$Significant_LVsP]>0, "Negative", "Positive")
 
 # Order sites:
-int$Phosphosite <- factor(as.character(int$Phosphosite), levels = int$Phosphosite[order(tab$Intensity.K_Vs_Intensity.P_FC[tab$Significant_KVsP & tab$Significant_LVsP])])
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+int$Phosphosite <- factor(as.character(int$Phosphosite), levels = int$Phosphosite[order(tab$Intensity.K_Vs_Intensity.P_FC[tab$Significant_KVsP & tab$Significant_LVsP])]) # There are two entries with "mmpL5-T10"!! The sequences are different. Check what this is!!! Leading proteins are: I7G3R8 and I7GBH7
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 int <- int[order(tab$Intensity.K_Vs_Intensity.P_FC[tab$Significant_KVsP & tab$Significant_LVsP]),]
 
 # Select the top regulated sites:
