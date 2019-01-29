@@ -21,6 +21,7 @@ Data from the analysis described in the document `DataInspection_20171205`.
 ```{r input}
 load("RData/Stat.RData")
 tab$PhosID <- gsub("MSMEG_4757", "Fas1", as.character(tab$PhosID))
+tab$PhosID <- gsub("FAS-", "Fas1-", as.character(tab$PhosID))
 ```
 
 # Heatmap of most regulated proteins
@@ -28,6 +29,11 @@ tab$PhosID <- gsub("MSMEG_4757", "Fas1", as.character(tab$PhosID))
 I keep the sites that are significantly regulated in K Vs P and L Vs P.
 
 ```{r}
+# Remove duplicate IDs for PknB from the 2 different species:
+temp <- names(table(as.character(tab$PhosID)))[table(as.character(tab$PhosID)) > 1]
+keepForPlot <- paste0(tab$PhosID[tab$PhosID %in% temp], "|", tab$ProtMatchingName[tab$PhosID %in% temp])
+tab$PhosID[tab$PhosID %in% temp] <- paste0(tab$PhosID[tab$PhosID %in% temp], "|", tab$ProtMatchingName[tab$PhosID %in% temp])
+
 # Select values:
 int <- tab[tab$Significant_KVsP & tab$Significant_LVsP,grepl("MeanTech", names(tab))]
 int$Phosphosite <- tab$PhosID[tab$Significant_KVsP & tab$Significant_LVsP]
@@ -35,9 +41,9 @@ names(int)[1:(ncol(int)-1)] <- substr(names(int), 11, 12)[1:(ncol(int)-1)]
 int$RegulationDirection <- ifelse(tab$Intensity.K_Vs_Intensity.P_FC[tab$Significant_KVsP & tab$Significant_LVsP]>0, "Negative", "Positive")
 
 # Order sites:
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-int$Phosphosite <- factor(as.character(int$Phosphosite), levels = int$Phosphosite[order(tab$Intensity.K_Vs_Intensity.P_FC[tab$Significant_KVsP & tab$Significant_LVsP])]) # There are two entries with "mmpL5-T10"!! The sequences are different. Check what this is!!! Leading proteins are: I7G3R8 and I7GBH7
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+int$Phosphosite <- factor(as.character(int$Phosphosite), levels = int$Phosphosite[order(tab$Intensity.K_Vs_Intensity.P_FC[tab$Significant_KVsP & tab$Significant_LVsP])]) # There are two entries with "mmpL5-T10"!! The sequences are different. Check what this is!!! Leading proteins are: I7G3R8 (Mmpl5 according to Uniprot) and I7GBH7 (also Mmpl5 according to Uniprot). These are identified in separate databases. I label them distinctly with their protein IDs
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 int <- int[order(tab$Intensity.K_Vs_Intensity.P_FC[tab$Significant_KVsP & tab$Significant_LVsP]),]
 
 # Select the top regulated sites:
@@ -112,11 +118,13 @@ pdfMLPManual(g, "Figures/NumberIDPhospho.pdf", 7,6)
 # Heatmap with the proteins of interest:
 
 ```{r}
-keep <- ((toupper(tab$GeneID2) %in% toupper(c(as.character(IntProt$Entry.name), "pknb", "pknbtub", "mtpknb"))) | tab$GeneID2 == "MSMEG_4757")
+IntProt <- read.table("OutputTables/ProteinsOfInterest3.txt", sep = "\t", header = T)
+keep <- ((toupper(tab$GeneID2) %in% toupper(c(as.character(IntProt$Entry.name), "pknb", "pknbtub", "mtpknb", keepForPlot))) | tab$GeneID2 == "MSMEG_4757")
+
 
 # Select values:
 int <- tab[keep,grepl("Intensity.K_Vs_Intensity.P_FC", names(tab))]
-int <- data.frame("FC_KVsP"= int, "Phosphosite" = tab$PhosID[keep], stringsAsFactors = )
+int <- data.frame("FC_KVsP"= int, "Phosphosite" = tab$PhosID[keep], stringsAsFactors = F)
 
 int <- int[!is.na(int$Phosphosite),]
 
@@ -136,21 +144,19 @@ g1 <- ggplot(int, aes(y = Phosphosite, x = x)) +
   theme(axis.ticks.x = element_blank(), axis.text.x = element_text(size = 10), axis.text.y = element_text(size = 6)) + 
   labs(title = "Log2-transformed Fold changes\nof sites of interest", subtitle = "P Vs K")
 print(g1)
-  
-
-
 ```
 
 
 # Heatmap with Fold changes for the pathway figure in the paper:
 
 ```{r}
-IntProt <- read.table("OutputTables/ProteinsOfInterest2.txt", sep = "\t", header = T, stringsAsFactors = F)
+IntProt <- read.table("OutputTables/ProteinsOfInterest3.txt", sep = "\t", header = T)
 IntProt <- IntProt[IntProt$keep,]
 tab$GeneID2 <- gsub(" ", "", tab$GeneID2)
 tab$PhosID <- gsub(" ", "", tab$PhosID)
 
-keep <- ((toupper(tab$GeneID2) %in% toupper(c(as.character(IntProt$Entry.name), "pknb", "pknbtub", "mtpknb"))) | tab$GeneID2 == "MSMEG_4757")
+keep <- ((toupper(tab$GeneID2) %in% toupper(c(as.character(IntProt$Entry.name), "pknb", "pknbtub", "mtpknb", keepForPlot))) | tab$GeneID2 == "MSMEG_4757")
+
 
 # Distinction between the tub Vs smeg PknB:
 tab$GeneID2[tab$ProtMatchingName=="A0QNG1" & !is.na(tab$ProtMatchingName)] <- paste0("Smeg_", tab$GeneID2[tab$ProtMatchingName=="A0QNG1" & !is.na(tab$ProtMatchingName)])

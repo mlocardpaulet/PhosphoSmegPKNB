@@ -153,11 +153,13 @@ for (i in 1:length(lvec)) {
 }
 
 
+vec <- gsub(" ", "", vec, fixed = T)
+
 vec[is.na(vec)] <- tab$Protein.IDs[is.na(vec)] # Add the annotation for the mutant protein that is not in Uniprot
 
 # Check names of proteins of interest:
 IntProt <- read.table("OutputTables/ProteinsOfInterest3.txt", sep = "\t", header = T)
-vec2 <- as.character(IntProt$Entry.name[match(vec, as.character(IntProt$mc.155))])
+vec2 <- as.character(IntProt$Entry.name[match(vec, as.character(IntProt$mc_155))])
 vec[(grepl("MSMEG", vec) | grepl("MSMEI", vec)) & !is.na(vec2)] <- vec2[(grepl("MSMEG", vec) | grepl("MSMEI", vec)) & !is.na(vec2)]
 
 tab$GeneID2 <- vec
@@ -500,7 +502,8 @@ pdfMLP(plot = g1, "Figures/ProteomicsFC.pdf", "landscape")
 
 
 ```{r}
-write.table(tab, "OutputTables/NormIntProt_20190127.txt", row.names = F, sep = "\t")
+# Remove the column with Excel issues (MQ IDs):
+write.table(tab[,c(1:188,198:241)], "OutputTables/NormIntProt_20190127.txt", row.names = F, sep = "\t")
 ```
 
 
@@ -1011,10 +1014,10 @@ for (i in 1:length(lvec)) {
 
 # Check names of proteins of interest:
 #IntProt <- read.table("OutputTables/ProteinsOfInterest2.txt", sep = "\t", header = T)
-vec2 <- as.character(IntProt$Entry.name[match(vec, as.character(IntProt$mc.155))])
+vec2 <- as.character(IntProt$Entry.name[match(vec, as.character(IntProt$mc_155))])
 vec[(grepl("MSMEG", vec) | grepl("MSMEI", vec)) & !is.na(vec2)] <- vec2[(grepl("MSMEG", vec) | grepl("MSMEI", vec)) & !is.na(vec2)]
 
-tab$GeneID2 <- vec
+tab$GeneID2 <- gsub(" ", "", vec, fixed = T)
 tab$Position2 <- pos
 
 tab$PhosID <- paste0(tab$GeneID2, "-", tab$Amino.acid, tab$Position2)
