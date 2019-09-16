@@ -91,6 +91,7 @@ pdfMLPManual(g, "Figures/AminoAcids.pdf", 5.5, 5)
 
 # Global representation of the impact of PknB over-expression on the phosphoproteome
 
+
 ```{r}
 MeanK <- rowMeans(tab[,289:291], na.rm = T)
 MeanL <- rowMeans(tab[,292:294], na.rm = T)
@@ -112,6 +113,26 @@ g <- ggplot(gtab[gtab$Detected=="yes",], aes(y= value, x = variable)) + geom_bar
 print(g)
 
 pdfMLPManual(g, "Figures/NumberIDPhospho.pdf", 7,6)
+```
+
+Venn diagrams of detected sites:
+
+```{r}
+ID_K <- tab$PhosID[!is.na(MeanK)]
+ID_P <- tab$PhosID[!is.na(MeanP)]
+ID_L <- tab$PhosID[!is.na(MeanL)]
+venn(list("K"=ID_K, "P" = ID_P, "L" = ID_L))
+title("Identified phosphosites")
+```
+
+and of regulated sites:
+
+```{r}
+KP <- tab$PhosID[tab$Significant_KVsP]
+KL <- tab$PhosID[tab$Significant_KVsL]
+LP <- tab$PhosID[tab$Significant_LVsP]
+venn(list("KVsP"=KP, "KVsL" = KL, "LVsP" = LP))
+title("Regulated phosphosites")
 ```
 
 
